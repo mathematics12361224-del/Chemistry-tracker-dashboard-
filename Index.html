@@ -1,0 +1,291 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#6D28D9" />
+  <title>Chemistry Tracker</title>
+  <style>
+    :root{
+      --bg:#f6f4ff; --card:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e5e7eb;
+      --purple:#6d28d9; --purple2:#8b5cf6; --green:#16a34a; --blue:#2563eb; --orange:#f59e0b; --red:#ef4444;
+      --shadow:0 18px 50px rgba(15,23,42,.08);
+      --radius:28px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    body{min-height:100vh}
+    .wrap{max-width:680px;margin:0 auto;padding:14px 14px 92px}
+    .hero,.panel,.card,.mini,.day,.log,.doubt{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .hero{padding:18px 18px 16px;margin-bottom:14px;background:linear-gradient(180deg,#e9ddff 0%, #f7f2ff 42%, #ffffff 100%)}
+    .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .iconbox{width:62px;height:62px;border-radius:22px;display:grid;place-items:center;background:white;border:1px solid rgba(255,255,255,.9);box-shadow:0 8px 20px rgba(109,40,217,.08)}
+    h1{margin:10px 0 0;font-size:30px;line-height:1.08;letter-spacing:-.03em}
+    .sub{margin-top:6px;color:var(--muted);font-size:14px;line-height:1.5}
+    .controls,.filters,.nav{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .controls{margin-top:14px}
+    input,select,textarea,button{font:inherit}
+    input,select,textarea{border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px 14px;outline:none}
+    textarea{resize:vertical;min-height:50px}
+    .btn{border:0;border-radius:16px;padding:12px 14px;cursor:pointer;background:var(--purple);color:#fff;font-weight:800}
+    .btn.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}
+    .btn.small{padding:8px 10px;border-radius:12px;font-size:12px}
+    .btn.active{background:var(--purple);color:#fff}
+    .btn.inactive{background:#fff;color:#334155;border:1px solid var(--line)}
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+    .mini{padding:12px;min-height:92px;background:#fff}
+    .mini .k{font-size:12px;color:var(--muted)}
+    .mini .v{margin-top:8px;font-size:20px;font-weight:900}
+    .bar{height:12px;background:#ece9f7;border-radius:999px;overflow:hidden;margin-top:12px}
+    .bar > div{height:100%;background:linear-gradient(90deg,var(--purple),var(--purple2))}
+    .section{margin-top:12px}
+    .panel{padding:14px}
+    .head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    .head h2{margin:0;font-size:18px}
+    .tag{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#f8fafc;font-size:12px;font-weight:700;color:#475569;border:1px solid var(--line)}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .focus-list,.chapter-list,.log-list{display:grid;gap:10px}
+    .focus{padding:12px;border:1px solid var(--line);border-radius:20px;background:#fafafa}
+    .focus .t{font-weight:900}
+    .focus .s{margin-top:4px;color:var(--muted);font-size:13px;line-height:1.45}
+    .calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:10px}
+    .day{padding:10px;min-height:98px;background:#fafafa}
+    .day.today{border:1px solid #d8c7ff;background:#fff}
+    .day .d{font-size:13px;font-weight:900}
+    .day .x{margin-top:7px;color:var(--muted);font-size:12px;line-height:1.35}
+    .tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.95);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+    .tabs .inner{max-width:680px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:8px 12px 10px}
+    .tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:transparent;color:#94a3b8;padding:8px 0;border-radius:16px}
+    .tab.active{color:var(--purple)}
+    .tab span{font-size:11px;font-weight:700}
+    .card{padding:12px}
+    .chapter-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;cursor:pointer}
+    .chapter-title{font-weight:900;font-size:16px;margin:0}
+    .chapter-micro{margin-top:3px;color:var(--muted);font-size:13px;line-height:1.4}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .progress-row{display:flex;gap:10px;align-items:center;margin-top:10px}
+    .progress{height:10px;background:#edf2f7;border-radius:999px;overflow:hidden;flex:1}
+    .progress > div{height:100%;background:linear-gradient(90deg,var(--purple),#4f46e5)}
+    .stage{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+    .stage .btn{font-size:12px;padding:8px 10px}
+    .detail{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);display:none}
+    .detail.show{display:block}
+    .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .meta .tag{background:#f8fafc}
+    .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .list{display:grid;gap:10px}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;font-size:13px;vertical-align:top}
+    th{color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+    .muted{color:var(--muted)}
+    .danger{color:var(--red)}
+    .green{color:var(--green)}
+    .blue{color:var(--blue)}
+    .orange{color:var(--orange)}
+    .hr{height:1px;background:var(--line);margin:12px 0}
+    .section-title{font-size:15px;font-weight:900;margin:0 0 8px}
+    .hide{display:none}
+    @media (max-width:720px){
+      .wrap{padding:12px 12px 92px}
+      .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .split,.grid2,.grid3{grid-template-columns:1fr}
+      .calendar{grid-template-columns:1fr 1fr}
+      h1{font-size:26px}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="hero-top">
+      <div>
+        <div class="iconbox"><span style="font-size:30px">⚗️</span></div>
+        <h1>Chemistry Tracker</h1>
+        <div class="sub">Track. Study. Master Chemistry. Full 31-chapter dashboard with revision, weak-topic targeting, doubts, and daily logs.</div>
+      </div>
+      <div class="tag">Offline-ready · browser saved</div>
+    </div><div class="stats">
+  <div class="mini"><div class="k">Topics Studied</div><div class="v" id="topicsStudied">0</div></div>
+  <div class="mini"><div class="k">Avg. Accuracy</div><div class="v" id="avgAccuracy">0%</div></div>
+  <div class="mini"><div class="k">Time Studied</div><div class="v" id="timeStudied">0h 0m</div></div>
+  <div class="mini"><div class="k">Day Streak</div><div class="v" id="streak">0</div></div>
+</div>
+
+<div class="bar"><div id="mainProgress" style="width:0%"></div></div>
+
+<div class="controls">
+  <label style="flex:1"><input id="search" type="text" placeholder="Search chapter / branch / subtopic" style="width:100%"></label>
+  <button class="btn secondary" id="resetAllBtn">Reset</button>
+  <button class="btn secondary" id="exportBtn">Export</button>
+  <button class="btn secondary" id="importBtn">Import</button>
+</div>
+
+<div class="filters section">
+  <button class="btn small active filterBtn" data-filter="All">All</button>
+  <button class="btn small inactive filterBtn" data-filter="Physical">Physical</button>
+  <button class="btn small inactive filterBtn" data-filter="Organic">Organic</button>
+  <button class="btn small inactive filterBtn" data-filter="Inorganic">Inorganic</button>
+</div>
+
+  </section>  <section class="panel section" id="homeView">
+    <div class="head"><h2>Overview</h2><span class="tag" id="nextTargetTag">This Week</span></div>
+    <div class="grid2 section">
+      <div class="card">
+        <div class="head"><h2>Topics Progress</h2><span class="tag">View All</span></div>
+        <div id="overviewProgress" class="list section"></div>
+      </div>
+      <div class="card">
+        <div class="head"><h2>Upcoming Review</h2><span class="tag">Auto</span></div>
+        <div id="upcomingReview" class="list section"></div>
+      </div>
+    </div><div class="card section">
+  <div class="head"><h2>Focus for tomorrow</h2><span class="tag">Weak topics first</span></div>
+  <div id="focusList" class="focus-list section"></div>
+</div>
+
+<div class="card section">
+  <div class="head"><h2>Week plan</h2><span class="tag">7-day revision rhythm</span></div>
+  <div id="weekPlan" class="calendar section"></div>
+</div>
+
+  </section>  <section class="panel section hide" id="topicsView">
+    <div class="head"><h2>Topics</h2><span class="tag">31 chapters</span></div>
+    <div id="topicsList" class="chapter-list section"></div>
+  </section>  <section class="panel section hide" id="practiceView">
+    <div class="head"><h2>Practice & Logs</h2><span class="tag">Daily target engine</span></div><div class="card section">
+  <div class="section-title">Quick daily log</div>
+  <div class="grid3">
+    <input id="logDate" type="date">
+    <select id="logChapter"></select>
+    <input id="logQ" type="number" min="1" value="50" placeholder="Questions done">
+  </div>
+  <div class="grid3 section">
+    <input id="logCorrect" type="number" min="0" placeholder="Correct (optional)">
+    <input id="logTopic" type="text" placeholder="Topic / subtopic">
+    <button class="btn" id="addLogBtn">Add log</button>
+  </div>
+  <textarea id="logNote" placeholder="Doubt / mistake / what to revise next" class="section" style="width:100%"></textarea>
+  <div class="muted section" id="dailyTargetText"></div>
+</div>
+
+<div class="card section">
+  <div class="section-title">Revision calendar</div>
+  <div id="revisionCalendar" class="calendar"></div>
+</div>
+
+<div class="card section">
+  <div class="section-title">AI doubts / mistake bank</div>
+  <div class="grid3">
+    <select id="doubtChapter"></select>
+    <input id="doubtTag" type="text" placeholder="Doubt tag">
+    <button class="btn" id="addDoubtBtn">Save doubt</button>
+  </div>
+  <textarea id="doubtText" placeholder="Write the exact doubt / wrong thought here" class="section" style="width:100%"></textarea>
+  <div id="doubtList" class="list section"></div>
+</div>
+
+<div class="card section">
+  <div class="section-title">Daily logs</div>
+  <div style="overflow:auto">
+    <table>
+      <thead><tr><th>Date</th><th>Q</th><th>Correct</th><th>Chapter</th><th>Topic / Note</th><th>Action</th></tr></thead>
+      <tbody id="logTable"></tbody>
+    </table>
+  </div>
+</div>
+
+  </section>  <section class="panel section hide" id="statsView">
+    <div class="head"><h2>Stats</h2><span class="tag">Weak-topic targeting</span></div>
+    <div class="grid2 section">
+      <div class="card">
+        <div class="section-title">Branch totals</div>
+        <div id="branchStats" class="list"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Weak-topic ranking</div>
+        <div id="weakRanking" class="list"></div>
+      </div>
+    </div>
+    <div class="card section">
+      <div class="section-title">Settings</div>
+      <div class="grid3">
+        <label>Plan days <input id="planDays" type="number" min="1" value="640" style="width:100%"></label>
+        <label>Strictness <input id="strictness" type="number" min="1" step="0.01" value="1.15" style="width:100%"></label>
+        <label>Revision gap 1 <input id="gap1" type="number" min="1" value="3" style="width:100%"></label>
+        <label>Revision gap 2 <input id="gap2" type="number" min="1" value="10" style="width:100%"></label>
+        <label>Revision gap 3 <input id="gap3" type="number" min="1" value="28" style="width:100%"></label>
+      </div>
+    </div>
+  </section>
+</div><nav class="tabs">
+  <div class="inner">
+    <button class="tab active" data-tab="Home"><span>🏠</span><span>Home</span></button>
+    <button class="tab" data-tab="Topics"><span>📘</span><span>Topics</span></button>
+    <button class="tab" data-tab="Practice"><span>⚗️</span><span>Practice</span></button>
+    <button class="tab" data-tab="Stats"><span>📊</span><span>Stats</span></button>
+  </div>
+</nav><script>
+const STORAGE_KEY='chemistry_master_tracker_full_v1';
+const STAGES=['Lecture','Practice','R1','R2','R3','Final'];
+const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const todayISO=new Date().toISOString().slice(0,10);
+
+const seed=[
+  {id:1, branch:'Physical', chapter:'Mole Concept', q:500, micro:'Mole, equivalent concept, stoichiometry, limiting reagent, purity/yield, concentration terms', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:2, branch:'Physical', chapter:'Atomic Structure', q:700, micro:'Rutherford, Bohr, de Broglie, uncertainty principle, quantum numbers, orbitals, photoelectric effect', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:3, branch:'Physical', chapter:'States of Matter', q:350, micro:'Gas laws, kinetic theory, real gases, intermolecular forces, vapour pressure', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:4, branch:'Physical', chapter:'Thermodynamics', q:800, micro:'State functions, enthalpy, Hess law, entropy, Gibbs energy, numericals', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:5, branch:'Physical', chapter:'Thermochemistry', q:450, micro:'Heat of reaction, enthalpy change, calorimetry, bond enthalpy, numericals', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:6, branch:'Physical', chapter:'Chemical Equilibrium', q:900, micro:'Law of mass action, equilibrium constant, Le Chatelier, Kp/Kc, dissociation', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:7, branch:'Physical', chapter:'Ionic Equilibrium', q:1000, micro:'pH, pOH, buffers, hydrolysis, common ion effect, Ksp, titration curves', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:8, branch:'Physical', chapter:'Solutions', q:600, micro:'Raoult law, colligative properties, osmotic pressure, abnormal molar mass', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:9, branch:'Physical', chapter:'Electrochemistry', q:850, micro:'Redox, galvanic cell, electrode potential, Nernst, electrolysis, Faraday laws', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:10, branch:'Physical', chapter:'Chemical Kinetics', q:700, micro:'Rate law, order, molecularity, integrated equations, half-life, Arrhenius', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:11, branch:'Physical', chapter:'Surface Chemistry', q:300, micro:'Adsorption, catalysis, colloids, emulsions, Brownian motion', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+
+  {id:12, branch:'Organic', chapter:'Basic Organic Chemistry (GOC)', q:1200, micro:'Bond fission, inductive, resonance, hyperconjugation, electromeric, intermediates, acidity/basicity', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:13, branch:'Organic', chapter:'Isomerism', q:800, micro:'Structural, geometrical, optical, chirality, meso, conformations', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:14, branch:'Organic', chapter:'Hydrocarbons', q:700, micro:'Alkanes, alkenes, alkynes, aromaticity, benzene, substitutions, additions', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:15, branch:'Organic', chapter:'Haloalkanes & Haloarenes', q:750, micro:'SN1, SN2, E1, E2, reactivity, conversions', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:16, branch:'Organic', chapter:'Alcohols, Phenols & Ethers', q:800, micro:'Preparation, properties, conversions, reactions, mixed practice', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:17, branch:'Organic', chapter:'Aldehydes & Ketones', q:1100, micro:'Nucleophilic addition, oxidation/reduction, named reactions, conversions', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:18, branch:'Organic', chapter:'Carboxylic Acids & Derivatives', q:550, micro:'Acidity, preparation, reactions, derivative logic', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:19, branch:'Organic', chapter:'Amines', q:850, micro:'Basicity, preparation, diazonium salts, Sandmeyer, conversions', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:20, branch:'Organic', chapter:'Biomolecules', q:300, micro:'Carbohydrates, proteins, amino acids, vitamins, nucleic acids', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:21, branch:'Organic', chapter:'Polymers', q:250, micro:'Monomers, polymerization, uses, NCERT facts', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:22, branch:'Organic', chapter:'Chemistry in Everyday Life', q:250, micro:'Drugs, detergents, soaps, cleaners, daily-use chemistry', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+
+  {id:23, branch:'Inorganic', chapter:'Periodic Table & Periodic Properties', q:500, micro:'Groups, periods, blocks, trends, radius, IE, EA, electronegativity', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:24, branch:'Inorganic', chapter:'Chemical Bonding', q:1200, micro:'Lewis, formal charge, VSEPR, hybridization, MOT, bond order, polarity, H-bonding', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:25, branch:'Inorganic', chapter:'Hydrogen', q:200, micro:'Hydrogen forms, hydrides, isotopes, NCERT facts', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:26, branch:'Inorganic', chapter:'s-Block Elements', q:350, micro:'Alkali and alkaline earth metals, trends, compounds', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:27, branch:'Inorganic', chapter:'p-Block (Groups 13–14)', q:550, micro:'Trends, anomalies, compounds, oxides, oxoacids', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:28, branch:'Inorganic', chapter:'p-Block (Groups 15–16)', q:600, micro:'Nitrogen & oxygen family, oxides, oxyacids, exceptions', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:29, branch:'Inorganic', chapter:'p-Block (Groups 17–18)', q:550, micro:'Halogens, interhalogens, oxyacids, noble gases', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:30, branch:'Inorganic', chapter:'d- & f-Block Elements', q:900, micro:'Transition elements, oxidation states, color, magnetism, lanthanides, actinides', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+  {id:31, branch:'Inorganic', chapter:'Coordination Compounds', q:1200, micro:'Ligands, nomenclature, isomerism, CFT, magnetic moment, structure', done:0, attempted:0, correct:0, last:null, stages:{}, notes:[], doubts:[]},
+].map(c=>({ ...c, stages:{Lecture:false,Practice:false,R1:false,R2:false,R3:false,Final:false} }));
+
+let state = loadState() || {
+  chapters: seed,
+  logs: [],
+  doubts: [],
+  filter: 'All',
+  search: '',
+  planDays: 640,
+  strictness: 1.15,
+  gap1: 3,
+  gap2: 10,
+  gap3: 28,
+  tab: 'Home',
+  today: todayISO,
+  logDate: todayISO,
+  logChapter: 1,
+  logQ: 50
+};
+state.chapters = normalizeChapters(state.chapters || seed);
+state.logs = Array.isArray(state.logs) ? state.logs : [];
+state.doubts = Array.isArray(state.doubts) ? state.doubts : [];
+
+function loadState(){
+  try { return JSON.parse(localStorage.getIte
